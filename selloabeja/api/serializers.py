@@ -50,10 +50,10 @@ class ClientSerializer(serializers.ModelSerializer):
     client = UserSerializer(required=True)
     class Meta:
         model = Client
-        fields = ('client', 'rut', 'phone',)
+        fields = ('client', 'rut', 'phone')
 
     def create(self, validated_data):
-
+        print(validated_data)
         client_data = validated_data.pop('client')
         client = UserSerializer.create(UserSerializer(), validated_data=client_data)
         student, created = Client.objects.update_or_create(
