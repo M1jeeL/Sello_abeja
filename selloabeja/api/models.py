@@ -7,6 +7,8 @@ class User(AbstractUser):
     is_client = models.BooleanField(default=False, verbose_name="Cliente")
     is_admin = models.BooleanField(default=False, verbose_name="Admin")
     is_tech = models.BooleanField(default=False, verbose_name="Tecnico")
+    #email = models.EmailField(allow_blank=False)
+
 
     class Meta:
         verbose_name = "user"
