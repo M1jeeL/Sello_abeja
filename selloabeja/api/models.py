@@ -51,7 +51,7 @@ class Client(models.Model):
     # Hereda los campos de tabla user
     client= models.OneToOneField(User, on_delete=models.CASCADE)
 
-    address = models.OneToOneField(Address, on_delete=models.CASCADE)
+    address = models.OneToOneField(Address, on_delete=models.CASCADE, null=True, blank=True)
  
     # Atributos
     rut = models.CharField(max_length=12, verbose_name="RUT")

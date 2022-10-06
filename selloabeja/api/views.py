@@ -1,8 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework import status
 from knox.auth import AuthToken
-from .serializers import RegisterClientSerializer
+from .serializers import ClientSerializer
+from .models import User
 
 @api_view(['POST'])
 def login_api(request):
@@ -39,17 +41,10 @@ def get_user_data(request):
 
 @api_view(['POST'])
 def register_client(request):
-    serializer = RegisterClientSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-
-    client = serializer.save()
-    _, token = AuthToken.objects.create(client)
-
-    return Response({
-        'client_info': {
-            'id': client.id,
-            'username': client.username,
-            'email': client.email
-        },
-        'token': token
-    })
+    serializer = ClientSerializer(data=request.data)
+    
+    if serializer.is_valid(raise_exception=ValueError):
+        serializer.create(validated_data=request.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.error_messages,
+                    status=status.HTTP_400_BAD_REQUEST)
