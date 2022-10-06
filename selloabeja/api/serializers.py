@@ -1,12 +1,12 @@
 
-from rest_framework import serializers, validators
 #from django.contrib.auth.hashers import make_password
+from rest_framework import serializers, validators
 from .models import Address, Client, Commune, Region, User
 
 class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Region
-        fields = ('')
+        fields = ('name')
 
 class CommuneSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,6 +45,13 @@ class UserSerializer(serializers.ModelSerializer):
                 }
             }
         }
+    def validate_password(self, password):
+        if len(password) < 7:
+            raise serializers.ValidationError('La contraseña debe ser mayor a 7')
+        if password.isnumeric():
+            raise serializers.ValidationError('La contraseña no puede ser solo numerica')
+        return password
+
 
 class ClientSerializer(serializers.ModelSerializer):
     client = UserSerializer(required=True)
@@ -53,11 +60,12 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = ('client', 'rut', 'phone')
 
     def create(self, validated_data):
-        print(validated_data)
+        validated_data['client']['is_client'] = True
         client_data = validated_data.pop('client')
         client = UserSerializer.create(UserSerializer(), validated_data=client_data)
         student, created = Client.objects.update_or_create(
-            client=client, rut=validated_data.pop('rut'),
+            client=client,
+            rut=validated_data.pop('rut'),
             phone=validated_data.pop('phone')
         )
         return student
