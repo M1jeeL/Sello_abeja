@@ -1,19 +1,55 @@
-from django.views import View
-from .models import Client
-from django.http import JsonResponse
-from django.forms import model_to_dict
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.auth import AuthToken
+from .serializers import RegisterClientSerializer
 
-class ClientListView(View):
-    def get(self, request):
-        if('name' in request.GET):
-            c_list = Client.objects.filter(name__contains=request.GET['name'])
-        else:
-            c_list = Client.objects.all()
+@api_view(['POST'])
+def login_api(request):
+    serializer = AuthTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-        return JsonResponse(list(c_list.values()), safe=False)
+    user = serializer.validated_data['user']
 
-class ClientDetailView(View):
-    def get(self, request, pk):
-        client = Client.objects.get(pk=pk)
+    _, token = AuthToken.objects.create(user)
 
-        return JsonResponse(model_to_dict(client))
+    return Response({
+        'user_info': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        },
+        'token': token
+    })
+
+@api_view(['GET'])
+def get_user_data(request):
+    user = request.user
+
+    if user.is_authenticated:
+        return Response({
+            'user_info': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            },
+        })
+    
+    return Response({'error': 'Not authenticated'}, status=400)
+
+@api_view(['POST'])
+def register_client(request):
+    serializer = RegisterClientSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    client = serializer.save()
+    _, token = AuthToken.objects.create(client)
+
+    return Response({
+        'client_info': {
+            'id': client.id,
+            'username': client.username,
+            'email': client.email
+        },
+        'token': token
+    })
