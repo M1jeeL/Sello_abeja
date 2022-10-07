@@ -87,6 +87,23 @@ class Admin(models.Model):
     def __str__(self):
       return self.admin.username
 
+class Suscriptor(models.Model):
+    # Hereda los campos de tabla user
+    suscriptor: models.OneToOneField(User, on_delete=models.CASCADE)
+
+     # Info del registro
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha creacion")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha actualizacion")
+    deleted_at =  models.DateTimeField(auto_now=False, verbose_name="Fecha eliminacion", blank=True, null=True)
+    
+    class Meta:
+        verbose_name = "suscriptor"
+        verbose_name_plural = "suscriptors"
+    
+    def __str__(self):
+      return self.suscriptor.username
+
+
 class Suscription(models.Model):
     # Atributos
     client = models.OneToOneField(Client, on_delete=models.CASCADE)
